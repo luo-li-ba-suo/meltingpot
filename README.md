@@ -1,3 +1,4 @@
+# Bugs in Stable Baselines3 Example Fixed
 # Melting Pot
 
 *A suite of test scenarios for multi-agent reinforcement learning.*
