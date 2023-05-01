@@ -74,7 +74,7 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
   def forward(self, observations) -> torch.Tensor:
     # Convert to tensor, rescale to [0, 1], and convert from
     #   B x H x W x C to B x C x H x W
-    observations = observations.permute(0, 3, 1, 2)
+    # observations = observations.permute(0, 3, 1, 2)
     features = self.conv(observations)
     features = F.relu(self.fc1(features))
     features = F.relu(self.fc2(features))
@@ -83,8 +83,9 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
 
 def main():
   # Config
-  env_name = "commons_harvest_open"
-  env_config = substrate.get_config(env_name)
+  env_name = "commons_harvest__open"
+  player_roles = substrate.get_config(env_name).default_player_roles
+  env_config = {"substrate": env_name, "roles": player_roles}
   env = utils.parallel_env(env_config)
   rollout_len = 1000
   total_timesteps = 2000000
@@ -125,7 +126,7 @@ def main():
       num_cpus=num_cpus,
       base_class="stable_baselines3")
   env = vec_env.VecMonitor(env)
-  env = vec_env.VecTransposeImage(env, True)
+  env = vec_env.VecTransposeImage(env)
 
   eval_env = utils.parallel_env(
       max_cycles=rollout_len,
@@ -138,7 +139,7 @@ def main():
   eval_env = ss.concat_vec_envs_v1(
       eval_env, num_vec_envs=1, num_cpus=1, base_class="stable_baselines3")
   eval_env = vec_env.VecMonitor(eval_env)
-  eval_env = vec_env.VecTransposeImage(eval_env, True)
+  eval_env = vec_env.VecTransposeImage(eval_env)
   eval_freq = 100000 // (num_envs * num_agents)
 
   policy_kwargs = dict(
